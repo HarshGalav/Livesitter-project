@@ -22,7 +22,7 @@ function App() {
     }, []);
 
     // Replace with your RTSPtoWeb HLS URL
-    const hlsUrl = 'http://localhost:8083/stream/pattern/channel/0/hls/live/index.m3u8';
+    const hlsUrl = 'http://localhost:8083/stream/111111111/channel/0/hls/live/index.m3u8';
 
     return (
         <div className="App">
@@ -32,7 +32,7 @@ function App() {
             <main className="app-main">
                 <div className="video-container">
                     {/* <VideoPlayer src={hlsUrl} overlays={overlays} /> */}
-                    <VideoFeed src="http://localhost:8083/stream/pattern/channel/0/hls/live/index.m3u8" overlays={overlays} />
+                    <VideoFeed src="http://localhost:8083/stream/111111111/channel/0/hls/live/index.m3u8" overlays={overlays} />
                 </div>
                 <div className="controls">
                     <OverlayEditor fetchOverlays={fetchOverlays} />

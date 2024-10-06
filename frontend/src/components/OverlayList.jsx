@@ -2,6 +2,8 @@ import React from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { useState } from 'react';
+import OverlayEditor from './OverlayEditor';
 
 const ListContainer = styled.div`
   width: 100%;
@@ -62,7 +64,18 @@ const DeleteButton = styled.button`
   }
 `;
 
+const EditButton = styled(DeleteButton)`
+  background-color: #ffc107;
+  margin-right: 10px;
+
+  &:hover {
+    background-color: #e0a800;
+  }
+`;
+
 const OverlayList = ({ overlays, fetchOverlays }) => {
+    const [editingOverlay, setEditingOverlay] = useState(null);
+
     const handleDelete = async (overlay) => {
         console.log('Attempting to delete overlay:', overlay);
         if (!overlay || !overlay._id) {
@@ -78,24 +91,43 @@ const OverlayList = ({ overlays, fetchOverlays }) => {
         }
     }
 
+    const handleEdit = (overlay) => {
+        setEditingOverlay(overlay);
+    }
+
+    const handleCancelEdit = () => {
+        setEditingOverlay(null);
+    }
+
     return (
         <ListContainer>
             <h3>Existing Overlays</h3>
-            <StyledList>
-                {overlays.map((overlay) => {
-                    const key = typeof overlay._id === 'object' ? overlay._id.$oid : overlay._id;
-                    return (
-                        <ListItem key={key}>
-                            <OverlayInfo>
-                                <strong>Type:</strong> {overlay.type} | <strong>Content:</strong> {overlay.content}<br />
-                                <strong>Position:</strong> ({overlay.position.x}, {overlay.position.y}) | 
-                                <strong>Size:</strong> ({overlay.size.width} x {overlay.size.height})
-                            </OverlayInfo>
-                            <DeleteButton onClick={() => handleDelete(overlay)}>Delete</DeleteButton>
-                        </ListItem>
-                    );
-                })}
-            </StyledList>
+            {editingOverlay ? (
+                <OverlayEditor
+                    fetchOverlays={fetchOverlays}
+                    editingOverlay={editingOverlay}
+                    onCancelEdit={handleCancelEdit}
+                />
+            ) : (
+                <StyledList>
+                    {overlays.map((overlay) => {
+                        const key = typeof overlay._id === 'object' ? overlay._id.$oid : overlay._id;
+                        return (
+                            <ListItem key={key}>
+                                <OverlayInfo>
+                                    <strong>Type:</strong> {overlay.type} | <strong>Content:</strong> {overlay.content}<br />
+                                    <strong>Position:</strong> ({overlay.position.x}, {overlay.position.y}) | 
+                                    <strong>Size:</strong> ({overlay.size.width} x {overlay.size.height})
+                                </OverlayInfo>
+                                <div>
+                                    <EditButton onClick={() => handleEdit(overlay)}>Edit</EditButton>
+                                    <DeleteButton onClick={() => handleDelete(overlay)}>Delete</DeleteButton>
+                                </div>
+                            </ListItem>
+                        );
+                    })}
+                </StyledList>
+            )}
         </ListContainer>
     );
 }
