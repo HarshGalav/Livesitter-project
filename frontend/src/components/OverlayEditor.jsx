@@ -1,44 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const OverlayEditor = ({ fetchOverlays, editingOverlay, onCancelEdit }) => {
+const OverlayEditor = ({ fetchOverlays }) => {
     const [type, setType] = useState('text'); // 'text' or 'logo'
     const [content, setContent] = useState('');
     const [position, setPosition] = useState({ x: '10px', y: '10px' });
     const [size, setSize] = useState({ width: '100px', height: '50px' });
     const [color, setColor] = useState('#FFFFFF'); // Only for text
-    const [layout, setLayout] = useState('default');
-
-    useEffect(() => {
-        if (editingOverlay) {
-            setType(editingOverlay.type);
-            setContent(editingOverlay.content);
-            setPosition(editingOverlay.position);
-            setSize(editingOverlay.size);
-            setColor(editingOverlay.color || '#FFFFFF');
-            setLayout(editingOverlay.layout);
-        }
-    }, [editingOverlay]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        const overlay = { type, content, position, size, layout };
+        const overlay = { type, content, position, size };
         if (type === 'text') {
             overlay.color = color;
         }
 
         try {
-            if (editingOverlay) {
-                await axios.put(`http://localhost:5000/api/overlays/${editingOverlay._id}`, overlay);
-            } else {
-                await axios.post('http://localhost:5000/api/overlays', overlay);
-            }
-            fetchOverlays();
-            if (onCancelEdit) onCancelEdit();
-            setContent('');
+            await axios.post('http://localhost:5000/api/overlays', overlay);
+            fetchOverlays(); // Fetch the overlays again after adding a new one
+            setContent(''); // Reset content field after submitting
         } catch (error) {
             console.error('Error submitting overlay:', error);
         }
@@ -46,7 +29,7 @@ const OverlayEditor = ({ fetchOverlays, editingOverlay, onCancelEdit }) => {
 
     const EditorContainer = styled.div`
         width: 100%;
-        max-width: 600px; // Adjust this value as needed
+        max-width: 600px;
         margin: 0 auto;
         padding: 20px;
     `;
@@ -139,23 +122,9 @@ const OverlayEditor = ({ fetchOverlays, editingOverlay, onCancelEdit }) => {
         }
     `;
 
-    const ButtonContainer = styled.div`
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-    `;
-
-    const CancelButton = styled(StyledButton)`
-        background-color: #6c757d;
-
-        &:hover {
-            background-color: #5a6268;
-        }
-    `;
-
     return (
         <EditorContainer>
-            <h3>{editingOverlay ? 'Edit Overlay' : 'Add Overlay'}</h3>
+            <h3>Add Overlay</h3>
             <StyledForm onSubmit={handleSubmit}>
                 <StyledLabel>
                     Type:
@@ -227,25 +196,7 @@ const OverlayEditor = ({ fetchOverlays, editingOverlay, onCancelEdit }) => {
                         required
                     />
                 </StyledLabel>
-                <StyledLabel>
-                    Layout:
-                    <StyledSelect value={layout} onChange={(e) => setLayout(e.target.value)}>
-                        <option value="default">Default</option>
-                        <option value="fullscreen">Fullscreen</option>
-                        <option value="picture-in-picture">Picture-in-Picture</option>
-                        <option value="side-by-side">Side-by-Side</option>
-                    </StyledSelect>
-                </StyledLabel>
-                <ButtonContainer>
-                    <StyledButton type="submit">
-                        {editingOverlay ? 'Update Overlay' : 'Add Overlay'}
-                    </StyledButton>
-                    {editingOverlay && (
-                        <CancelButton type="button" onClick={onCancelEdit}>
-                            Cancel
-                        </CancelButton>
-                    )}
-                </ButtonContainer>
+                <StyledButton type="submit">Add Overlay</StyledButton>
             </StyledForm>
         </EditorContainer>
     );
@@ -253,8 +204,6 @@ const OverlayEditor = ({ fetchOverlays, editingOverlay, onCancelEdit }) => {
 
 OverlayEditor.propTypes = {
     fetchOverlays: PropTypes.func.isRequired,
-    editingOverlay: PropTypes.object,
-    onCancelEdit: PropTypes.func,
 };
 
 export default OverlayEditor;
